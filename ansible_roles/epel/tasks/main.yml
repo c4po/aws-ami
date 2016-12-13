@@ -1,0 +1,9 @@
+---
+# file: roles/epel/tasks/main.yml
+
+- name: EPEL GPG Key
+  rpm_key: key=http://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-{{ ansible_distribution_major_version }}
+
+- name: EPEL yum repo
+  template: src=epel.repo.j2 dest=/etc/yum.repos.d/epel.repo 
+  

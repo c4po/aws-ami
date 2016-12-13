@@ -1,0 +1,8 @@
+---
+
+# ansible-playbook -i ./ec2.py -u ec2-user --sudo rancher-playbook.yml --private-key /Users/maxcai/.ssh/id_rsa_aviva
+
+- hosts: all
+  roles:
+    - epel
+    - aws_docker

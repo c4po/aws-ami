@@ -1,0 +1,41 @@
+---
+# file: roles/aws_docker/tasks/main.yml
+
+- include: lvm.yml
+
+- include: setup-centos.yml
+
+- file: path=/root/.docker state=directory mode=0755
+
+# - copy: src=config.json dest=/root/.docker/config.json mode=0400
+
+- file: path=/usr/local/tmpdir state=directory mode=0777
+
+- name: update env file
+  lineinfile: dest=/etc/environment insertafter="EOF" line="export TMP=/usr/local/tmpdir"
+
+# - lineinfile: dest=/etc/environment state=absent regexp="http_proxy"
+# - lineinfile: dest=/etc/environment state=absent regexp="https_proxy"
+
+# - lineinfile: dest=/etc/profile state=absent regexp="http_proxy"
+# - lineinfile: dest=/etc/profile state=absent regexp="https_proxy"
+# - lineinfile: dest=/etc/profile state=absent regexp="no_proxy"
+
+
+- name: Restart docker
+  service: name=docker enabled=yes state=started
+  # service:
+  #   name=docker
+  #   state=restarted
+  #   enabled=yes
+
+- name: get docker-compose
+  get_url:
+    url={{ docker_compose_url }}
+    dest=/usr/local/bin/docker-compose
+
+- name: Ensure file ownership
+  file: path=/usr/local/bin/docker-compose
+        mode=0755
+
+

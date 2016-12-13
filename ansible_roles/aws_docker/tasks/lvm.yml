@@ -1,0 +1,45 @@
+---
+# file: roles/docker/tasks/lvm.yml
+
+- name: install lvm2
+  yum: name=lvm2 state=present
+
+- stat: path=/etc/systemd/system/docker.service.d/storage.conf
+  register: docker_storage_conf
+
+- name: check lsblk
+  shell: lsblk
+  
+- name: create pv
+  shell: pvcreate /dev/xvdl
+  when: docker_storage_conf.stat.exists == False
+
+- name: create vg
+  shell: vgcreate docker /dev/xvdl
+  when: docker_storage_conf.stat.exists == False
+
+- name: create lv thinpool
+  shell: lvcreate --wipesignatures y -n thinpool docker -l 95%VG
+  when: docker_storage_conf.stat.exists == False
+
+- name: create lv thinpoolmeta
+  shell: lvcreate --wipesignatures y -n thinpoolmeta docker -l 1%VG
+  when: docker_storage_conf.stat.exists == False
+
+- name: create thinpool
+  shell: lvconvert -y --zero n -c 512K --thinpool docker/thinpool --poolmetadata docker/thinpoolmeta
+  when: docker_storage_conf.stat.exists == False
+
+- name: push docker-thinpool.profile
+  copy: src=docker-thinpool.profile dest=/etc/lvm/profile/docker-thinpool.profile mode=0644
+
+- name: apply profile
+  shell: lvchange --metadataprofile docker-thinpool docker/thinpool
+  when: docker_storage_conf.stat.exists == False
+
+- file: path=/etc/systemd/system/docker.service.d state=directory mode=0755
+
+- name: push docker storage config
+  copy: src=storage.conf dest=/etc/systemd/system/docker.service.d/storage.conf mode=0644
+  when: docker_storage_conf.stat.exists == False
+

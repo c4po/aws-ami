@@ -1,0 +1,11 @@
+---
+# file: roles/docker/defaults/main.yml
+
+docker_baseurl: http://yum.dockerproject.org/repo/main/centos/7/Packages
+docker_version: 1.12.1-1
+docker_url: "{{ docker_baseurl}}/docker-engine-{{ docker_version }}.el7.centos.x86_64.rpm"
+docker_selinux_url: "{{ docker_baseurl}}/docker-engine-selinux-{{ docker_version }}.el7.centos.noarch.rpm"
+env: undefined
+
+compose_version: 1.8.0
+docker_compose_url: https://github.com/docker/compose/releases/download/{{ compose_version }}/docker-compose-Linux-x86_64

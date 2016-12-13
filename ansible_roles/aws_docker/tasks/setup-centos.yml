@@ -1,0 +1,16 @@
+---
+# file: roles/docker/tasks/main.yml
+
+- name: install the docker selinux rpm from repo
+  yum: name={{docker_selinux_url}} disable_gpg_check=yes state=present
+
+- name: install the docker rpm from repo
+  yum: name={{docker_url}} disable_gpg_check=yes state=present
+
+# Docker 1.12+
+# - name: update /usr/lib/systemd/system/docker.service
+#   ini_file: dest=/usr/lib/systemd/system/docker.service
+#             section=Service
+#             option=ExecStart
+#             value="/usr/bin/dockerd --storage-driver=devicemapper --storage-opt=dm.thinpooldev=/dev/mapper/docker-thinpool --storage-opt=dm.use_deferred_removal=true --storage-opt=dm.use_deferred_deletion=true"
+

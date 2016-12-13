@@ -1,0 +1,74 @@
+{
+  "_comment": "ami-d61c59bc CIS RHEL7 V1.1.0.1 ami-1fa53a08 CIS RHEL7 V2.1.0",
+
+  "variables": {
+    "aws_access_key": "",
+    "aws_secret_key": "",
+  },
+
+  "builders": [
+    {
+      "type": "amazon-ebs",
+      "access_key": "{{user `aws_access_key`}}",
+      "secret_key": "{{user `aws_secret_key`}}",
+      "region": "us-east-1",
+      "source_ami": "ami-d61c59bc",
+      "ssh_pty": true,
+      "instance_type": "t2.medium",
+      "ssh_username": "ec2-user",
+      "ami_block_device_mappings": [
+        {
+          "device_name": "/dev/sdg",
+          "volume_size": 100,
+          "volume_type": "gp2",
+          "delete_on_termination": true
+        },
+        {
+          "device_name": "/dev/sdl",
+          "volume_size": 100,
+          "volume_type": "gp2",
+          "delete_on_termination": true
+        }
+      ],
+      "launch_block_device_mappings": [
+        {
+          "device_name": "/dev/sdg",
+          "volume_size": 100,
+          "volume_type": "gp2",
+          "delete_on_termination": true
+        },
+        {
+          "device_name": "/dev/sdl",
+          "volume_size": 100,
+          "volume_type": "gp2",
+          "delete_on_termination": true
+        }
+      ],
+      "ami_name": "AvivaCABaseBuild-SE-STOR-RHEL7 {{timestamp}}",
+      "ami_description": "AMI for SE team with Storage option"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "inline": [
+        "sudo rpm -iUvh http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-8.noarch.rpm",
+        "sudo yum -y install ansible",
+        "sudo growpart /dev/xvdg 1",
+        "sudo xfs_growfs /dev/xvdg1"
+      ],
+      "remote_folder": "/home/ec2-user"
+    },
+    {
+      "type": "ansible-local",
+      "playbook_file": "./se_base_storage_playbook.yml",
+      "extra_arguments": [
+        "--sudo"
+      ],
+      "role_paths": [
+        "./ansible_roles/epel",
+        "./ansible_roles/aws_docker"
+      ]
+    }
+  ]
+}
